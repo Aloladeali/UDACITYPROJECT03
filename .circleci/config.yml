@@ -307,7 +307,7 @@ jobs:
     steps:
       # Checkout code from git
       - checkout
-      - nstall_awscli
+      - install_awscli
       - install_nodejs
       - restore_cache:
           keys: [backend-build]
