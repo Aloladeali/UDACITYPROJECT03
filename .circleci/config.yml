@@ -51,8 +51,7 @@ commands:
             curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
             unzip awscliv2.zip
             sudo ./aws/install
-
-          
+       
   install_ansible:
     description: Install Ansible
     steps:
@@ -60,6 +59,8 @@ commands:
           name: Install Ansible
           command: |
           python3 -m pip install --user ansible
+
+          
 jobs:
   build-frontend:
     docker:
