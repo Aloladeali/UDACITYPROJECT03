@@ -1,32 +1,54 @@
 ---
-- name: "Creates the backend app directory"
-  file:
-    path: ~/backend-app
-    state: directory
+- name: "Update apt packages"
+  become: true
+  apt:
+    update_cache: true
 
-- name: "Unarchive backend files"
+- name: "Upgrade packages"
+  become: true
+  apt:
+    update_cache: true 
+
+- name: "Remove unrequired dependencies"
+  become: true
+  apt:
+    autoremove: true 
+
+
+- name: "Install Node.js 13"
+  shell: |
+   # Install Node.js LTS version as our base Node.js version
+   curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+   sudo apt-get install -y nodejs
+
+   # Use n version manager to use Node.js v13.8.0
+   sudo npm install -g n
+   sudo n 13.8.0
+
+- name: "Install PM2 globally"
+  npm:  
+    name: pm2
+    global: yes
+
+- name: "install n"
+  become: true
+  npm:
+    name: n
+    global: true
+    production: true
+
+
+- name: Copy artifact into instance
+  become: yes
   unarchive:
-    src: artifact.tar.gz
-    dest: ~/backend-app
+    src: files/artifact.tar.gz
+    dest: .
+    
 
-- name: "Installing Node Dependencies"
+- name: Start the App
+  become: true
   shell: |
-    cd ~/backend-app
-    npm i
-
-- name: "Executing Node app with PM2"
-  shell: |
-    cd ~/backend-app/dist
-    pm2 stop default
-    pm2 start main.js
-
-  register: execute_node
-
-- name: print message
-  debug:
-    msg: "{{ execute_node.stdout_lines }}"
-
-- name: "Configure pm2 to start as service"
-  shell: |
-    sudo su -c "env PATH=$PATH:/usr/local/bin pm2 startup systemd -u ubuntu --hp /home/ubuntu"
-    pm2 save
+    cd ~/
+    npm install
+    sudo pm2 stop default
+    sudo pm2 start npm -- start
