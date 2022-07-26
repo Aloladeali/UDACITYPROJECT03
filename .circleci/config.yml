@@ -234,29 +234,23 @@ jobs:
 
   configure-infrastructure:
     docker:
-      # Docker image here that supports Ansible
-      - image: cimg/python:3.10
+      - image: python:3.10-alpine3.16
     steps:
-      # Checkout code from git
       - checkout
-      - install_awscli
-      - install_ansible
-      # Add ssh keys with fingerprint
       - add_ssh_keys:
           fingerprints: ["24:6f:08:e5:90:5e:a9:ee:53:b3:a9:44:9a:8a:c0:cc"]
-
-      # attach workspace
       - attach_workspace:
           at: ~/
       - run:
-          name: Configure server
+          name: Install dependencies
           command: |
-            # Your code here
-            cd .circleci/ansible
-            cat inventory.txt
-            
+            apk add --update ansible tar gzip aws-cli openssh     
+      - run:
+          name: Configure server
+          command: |         
+            cd ~/project/.circleci/ansible
             ansible-playbook -i inventory.txt configure-server.yml
-
+            cat ~/project/.circleci/ansible/inventory.txt
       # Here's where you will add some code to rollback on failure
       - destroy-environment
 
@@ -355,7 +349,7 @@ jobs:
           name: Install dependencies
           command: |
             # your code here
-            apk add --update --no-cache tar gzip nodejs npm aws-cli ansible
+            apk add --update --no-cache tar gzip nodejs npm aws-cli ansible openssh
 
       # attach workspace
       - attach_workspace:
