@@ -26,9 +26,12 @@
    sudo n 13.8.0
 
 - name: "Install PM2 globally"
+  become: true
   npm:  
     name: pm2
     global: yes
+    state: latest
+    production: true
 
 - name: "install n"
   become: true
