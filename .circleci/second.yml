@@ -223,3 +223,25 @@ workflows:
       # Here's where you will add some code to rollback on failure
       - destroy-environment
       - revert-migrations 
+
+
+
+
+      - name: Copy artifact into instance
+  unarchive:
+    src: files/artifact.tar.gz
+    dest: ~/backend-app
+    
+
+- name: "Installing Node dependencies"
+  shell: |
+    cd ~/backend-app
+    npm i
+
+- name: Start the App
+  become: true
+  shell: |
+    cd ~/backend-app/dist
+    npm install
+    sudo pm2 stop default
+    sudo pm2 start npm -- start
