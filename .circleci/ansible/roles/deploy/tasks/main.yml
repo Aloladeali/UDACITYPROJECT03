@@ -59,7 +59,8 @@
     cd ~/
     npm install
     pm2 stop default
-    pm2 start npm -- start
+    pm2 start
+    npm start
 
   environment:
     - NODE_ENV: production
