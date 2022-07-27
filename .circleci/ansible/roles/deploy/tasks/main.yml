@@ -1,0 +1,76 @@
+- name: "Update apt packages"
+  become: true
+  apt:
+    update_cache: true
+
+- name: "Upgrade packages"
+  become: true
+  apt:
+    update_cache: true 
+
+- name: "Remove unrequired dependencies"
+  become: true
+  apt:
+    autoremove: true 
+
+
+- name: "Install Node.js 13"
+  shell: |
+   # Install Node.js LTS version as our base Node.js version
+   curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+   sudo apt-get install -y nodejs
+
+   # Use n version manager to use Node.js v13.8.0
+   sudo npm install -g n
+   sudo n 13.8.0
+
+- name: "Install PM2 globally"
+  npm:  
+    name: pm2
+    global: yes
+
+- name: "install n"
+  become: true
+  npm:
+    name: n
+    global: true
+    production: true
+
+#- name: "Create the backend app directory"
+  #file:
+    #path: ~/web
+    #state: directory
+
+
+- name: Copy artifact into instance
+  become: true
+  copy:
+    src: files/artifact.tar.gz
+    dest: ~/
+    
+- name: Extract the Artifact
+  become: true
+  shell: |
+    tar -xvzf ~/artifact.tar.gz
+
+- name: Start the App
+  become: true
+  shell: |
+    cd ~/
+    npm install
+    pm2 stop default
+    pm2 start npm -- start
+
+  environment:
+    - NODE_ENV: production
+    - ENVIRONMENT: production
+    - TYPEORM_CONNECTION: "{{ lookup('env', 'TYPEORM_CONNECTION')}}"  
+    # Add more env vars here
+    - TYPEORM_ENTITIES: "{{ lookup('env', 'TYPEORM_ENTITIES')}}"
+    - TYPEORM_HOST: "{{ lookup('env', 'TYPEORM_HOST')}}"
+    - TYPEORM_PORT: 5432
+    - TYPEORM_USERNAME: "{{ lookup('env', 'TYPEORM_USERNAME')}}"
+    - TYPEORM_PASSWORD: "{{ lookup('env', 'TYPEORM_PASSWORD')}}"
+    - TYPEORM_DATABASE: "{{ lookup('env', 'TYPEORM_DATABASE')}}"
+    - TYPEORM_MIGRATIONS: "{{ lookup('env', 'TYPEORM_MIGRATIONS')}}"
+    - TYPEORM_MIGRATIONS_DIR: "{{ lookup('env', 'TYPEORM_MIGRATIONS_DIR')}}"
