@@ -61,12 +61,11 @@
   become: true
   shell: |
     cd ~/
-    #cd ~/backend/dist
     npm install
     pm2 stop default
-    pm2 start npm -- start
-    npm start
-    #pm2 start main.js
+    pm2 start main.js
+    # pm2 start npm -- start
+
 
   environment:
     - NODE_ENV: production
