@@ -20,6 +20,7 @@ commands:
 
             # Delete backend stack
             aws cloudformation delete-stack --stack-name udapeople-backend-<< parameters.Workflow_ID >>
+
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
     parameters:
@@ -53,20 +54,20 @@ commands:
       - run:
           name: Install Ansible
           command: |
-            sudo apt update
-            sudo apt install -y python3 python3-pip
             python3 -m pip install --user ansible
 
-  install-nodejs:
-    description: install-node.js.13
+  install_nodejs:
+    description: install-node.js.13.8.0
     steps:
       - run:
-          name: install-node.js.13
+          name: install-node.js.13.8.0
           command: |
-            curl fsSL http://deb.nodesource.com/setup_13.x | sudo -E bash -
+            curl fsSL http://deb.nodesource.com/setup_lts.x | sudo -E bash -
             sudo apt install -y nodejs
-            
 
+            sudo npm install --global n
+            sudo n 13.8.0
+            
 jobs:
   build-frontend:
     docker:
@@ -310,7 +311,7 @@ jobs:
     steps:
       - checkout
       - install_awscli
-      - install_nodejs
+      - installnodejs
       - restore_cache:
           keys: [backend-build]
       - run:
