@@ -311,7 +311,7 @@ jobs:
     steps:
       - checkout
       - install_awscli
-      - installnodejs
+      - install_nodejs
       - restore_cache:
           keys: [backend-build]
       - run:
