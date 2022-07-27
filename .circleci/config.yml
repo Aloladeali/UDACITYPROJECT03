@@ -435,19 +435,24 @@ jobs:
       - revert-migrations
       - destroy-environment
 
- cloudfront-update:
+
+  cloudfront-update:
     docker:
+      # Docker image here that supports AWS CLI
       - image: python:3.10-alpine3.16
     steps:
+      # Checkout code from git
       - checkout
       - run:
           name: Install dependencies
           command: |
+            # your code here
             apk add --update --no-cache tar gzip nodejs npm curl
             pip install awscli
       - run:
           name: Update cloudfront distribution
           command: |
+            # your code here
             export OldWorkflowID=$(aws cloudformation list-exports \
               --query "Exports[?Name==\`WorkflowID\`].Value" --no-paginate --output text)
             echo OldWorkflowID: "${OldWorkflowID}"
@@ -461,11 +466,32 @@ jobs:
 
             echo OldWorkflowID: "${OldWorkflowID}"
             echo Current Workflow Id: "${CIRCLE_WORKFLOW_ID:0:7}"
+      # Here's where you will add some code to rollback on failure
       - revert-migrations
       - destroy-environment 
 
-
-
+  cleanup:
+    docker:
+      - image:  amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+          name: Get old stack workflow id
+          command: |
+            export OldWorkflowID=$(aws cloudformation list-exports --query "Exports[?Name==\`WorkflowID\`].Value" --no-paginate --output text)
+            echo OldWorkflowID: "${OldWorkflowID}"
+            echo CIRCLE_WORKFLOW_ID "${CIRCLE_WORKFLOW_ID:0:7}"
+            export STACKS=($(aws cloudformation list-stacks --query "StackSummaries[*].StackName" --stack-status-filter CREATE_COMPLETE --no-paginate --output text)) 
+            echo Stack names: "${STACKS[@]}"
+            
+            if [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
+            then
+              echo "-----------------Delete Confirmed----------------"
+              aws cloudformation delete-stack --stack-name "${OldWorkflowID}"
+              aws cloudformation delete-stack --stack-name "${OldWorkflowID}"
+            else
+              echo "----------------No need to clean up-----------------"
+            fi
 
 workflows:
   default:
@@ -497,3 +523,6 @@ workflows:
           requires: [deploy-backend, deploy-frontend]
       - cloudfront-update:
           requires: [smoke-test]
+      - cleanup:
+          requires: [cloudfront-update]
+
