@@ -1,5 +1,3 @@
 [URL01] https://github.com/Aloladeali/UDACITYPROJECT03.git
-[URL02]
-[URL03]
-[URL04]
-[URL05]
+[URL02] http://udapeople-6d25401.s3-website-us-east-1.amazonaws.com
+
