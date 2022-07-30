@@ -18,8 +18,8 @@
     state: present
 
   environment:
-    #- NODE_ENV: production
-    #- ENVIRONMENT: production
+    - NODE_ENV: production
+    - ENVIRONMENT: production
     - TYPEORM_CONNECTION: "{{ lookup('env', 'TYPEORM_CONNECTION')}}"  
     # Add more env vars here
     - TYPEORM_ENTITIES: "{{ lookup('env', 'TYPEORM_ENTITIES')}}"
